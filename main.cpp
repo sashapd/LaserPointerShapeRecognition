@@ -46,6 +46,15 @@ bool getPointerLocation(const cv::Mat& maskImage, cv::Point& location) {
     return true;
 }
 
+std::vector<cv::Point> getApproximateShape(const std::vector<cv::Point>& contour) {
+    std::cout << "size" << contour.size();
+    double perimeter = cv::arcLength(contour, true);
+
+    std::vector<cv::Point> points;
+    cv::approxPolyDP(contour, points, perimeter * 0.03, true);
+    return points;
+}
+
 int main() {
     cv::VideoCapture cap(0);
 
@@ -55,7 +64,7 @@ int main() {
     cap.read(baseFrame);
 
     std::vector<cv::Point> contour;
-    std::vector<std::vector<cv::Point>> contours;
+    std::vector<std::vector<cv::Point>> contours(1);
 
     int framesNotFound = 0;
 
@@ -68,15 +77,18 @@ int main() {
         bool found = getPointerLocation(mask, pointerLocation);
 
         if(found) {
-            contours.back().push_back(pointerLocation);
+            contours[contours.size() - 1].push_back(pointerLocation);
             framesNotFound = 0;
         } else {
             framesNotFound++;
         }
-        if(framesNotFound > 25) {
-
+        if(framesNotFound > 25 && contours[contours.size() - 1].size() > 2) {
+            std::vector<cv::Point> approxPoints = getApproximateShape(contours.back());
+            contours[contours.size() - 1] = approxPoints;
+            contours.push_back(std::vector<cv::Point>());
+            framesNotFound = 0;
         }
-        cv::drawContours(frame, contours, 0, cv::Scalar(0, 255, 0));
+        cv::drawContours(frame, contours, -1, cv::Scalar(0, 255, 0));
         cv::imshow("mask", frame);
     }
     return 0;
