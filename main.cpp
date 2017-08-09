@@ -59,6 +59,29 @@ std::vector<cv::Point> getApproximateShape(const std::vector<cv::Point>& contour
     return convexPoints;
 }
 
+std::string getPolygonName(int nPoints) {
+    switch(nPoints) {
+        case 1:
+            return "Point";
+        case 2:
+            return "Line";
+        case 3:
+            return "Triangle";
+        case 4:
+            return "Quadrilateral";
+        case 5:
+            return "Pentagon";
+        case 6:
+            return "Hexagon";
+        case 7:
+            return "Heptagon";
+        case 8:
+            return "Octagon";
+        default:
+            return "Unknown";
+    }
+}
+
 int main() {
     cv::VideoCapture cap(0);
 
@@ -85,15 +108,21 @@ int main() {
         } else {
             framesNotFound++;
         }
+
         if(framesNotFound > 25 && contours[contours.size() - 1].size() > 2) {
             std::vector<cv::Point> approxPoints = getApproximateShape(contours.back());
             contours[contours.size() - 1] = approxPoints;
             contours.push_back(std::vector<cv::Point>());
             framesNotFound = 0;
         }
+
         cv::RNG rng(666648834);
         for(int i = 0; i < contours.size(); i++) {
             cv::drawContours(frame, contours, i, cv::Scalar(rng.uniform(100,200), rng.uniform(100, 200), rng.uniform(100, 200)), 10);
+        }
+        if(contours.size() > 1) {
+            std::string lastShape = getPolygonName(contours[contours.size() - 2].size());
+            cv::putText(frame, "Last shape: " + lastShape, cv::Point(frame.cols / 2 - 450, frame.rows - 50), cv::FONT_HERSHEY_PLAIN, 5, cv::Scalar(0, 0, 0), 3);
         }
         cv::imshow("mask", frame);
     }
