@@ -51,8 +51,12 @@ std::vector<cv::Point> getApproximateShape(const std::vector<cv::Point>& contour
     double perimeter = cv::arcLength(contour, true);
 
     std::vector<cv::Point> points;
-    cv::approxPolyDP(contour, points, perimeter * 0.03, true);
-    return points;
+    cv::approxPolyDP(contour, points, perimeter * 0.07, true);
+
+    std::vector<cv::Point> convexPoints;
+    cv::convexHull(points, convexPoints);
+
+    return convexPoints;
 }
 
 int main() {
