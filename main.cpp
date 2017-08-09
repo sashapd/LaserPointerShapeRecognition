@@ -67,7 +67,6 @@ int main() {
     cv::Mat baseFrame;
     cap.read(baseFrame);
 
-    std::vector<cv::Point> contour;
     std::vector<std::vector<cv::Point>> contours(1);
 
     int framesNotFound = 0;
@@ -92,7 +91,10 @@ int main() {
             contours.push_back(std::vector<cv::Point>());
             framesNotFound = 0;
         }
-        cv::drawContours(frame, contours, -1, cv::Scalar(0, 255, 0));
+        cv::RNG rng(666648834);
+        for(int i = 0; i < contours.size(); i++) {
+            cv::drawContours(frame, contours, i, cv::Scalar(rng.uniform(100,200), rng.uniform(100, 200), rng.uniform(100, 200)), 10);
+        }
         cv::imshow("mask", frame);
     }
     return 0;
